@@ -394,21 +394,13 @@ std::string Context::GetAppBundlePath() {
     return folderManager.getMainBundlePath();
 #endif
 
-#ifdef __linux__
-    std::string progpath(PATH_MAX, '\0');
-    int len = readlink("/proc/self/exe", &progpath[0], progpath.size() - 1);
-    if (len != -1) {
-        progpath.resize(len);
-
-        // Find the last '/' and remove everything after it
-        long unsigned int lastSlash = progpath.find_last_of("/");
-        if (lastSlash != std::string::npos) {
-            progpath.erase(lastSlash);
-        }
-
-        return progpath;
+    const char* basePath = SDL_GetBasePath();
+    if (basePath != NULL) {
+        std::string path(basePath);
+        // SDL_GetBasePath is guaranted to return a path that ends with a path separator which we don't want
+        path.pop_back();
+        return path;
     }
-#endif
 
     return ".";
 #endif
